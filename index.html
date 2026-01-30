@@ -3,102 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CollegeSearch India | 1 Lakh+ Colleges</title>
+    <title>CollegeGuru | Search 1 Lakh Colleges</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 font-sans">
+<body class="bg-gray-50">
 
-    <nav class="bg-white border-b p-4 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto flex justify-between items-center px-4">
-            <h1 class="text-2xl font-black text-blue-900">COLLEGE<span class="text-orange-500">GURU</span></h1>
-            <div class="hidden md:flex space-x-6 text-gray-600 font-bold">
-                <a href="#">Top Colleges</a>
-                <a href="#">Reviews</a>
-                <a href="#">Courses</a>
-            </div>
+    <nav class="bg-white border-b p-4 sticky top-0 z-50 shadow-sm flex justify-between items-center px-10">
+        <h1 class="text-2xl font-black text-blue-900">COLLEGE<span class="text-orange-500">GURU</span></h1>
+        <div class="space-x-6 font-bold text-gray-600">
+            <a href="#">Top Colleges</a> <a href="#">Reviews</a> <a href="#">Courses</a>
         </div>
     </nav>
 
     <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 p-6">
-        
-        <aside class="w-full lg:w-1/4 space-y-6">
-            <div class="bg-white p-6 rounded-xl border shadow-sm">
-                <h3 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2">Search</h3>
-                <input type="text" id="searchInput" placeholder="Search by name..." 
-                       class="w-full p-2 border rounded-lg bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500">
-                
-                <h3 class="font-bold text-lg mt-8 mb-4 text-gray-800 border-b pb-2">Filter by Location</h3>
-                <div class="space-y-3">
-                    <label class="flex items-center space-x-2"><input type="checkbox" class="w-4 h-4"> <span>Delhi NCR</span></label>
-                    <label class="flex items-center space-x-2"><input type="checkbox" class="w-4 h-4"> <span>Mumbai</span></label>
-                    <label class="flex items-center space-x-2"><input type="checkbox" class="w-4 h-4"> <span>Bangalore</span></label>
-                    <label class="flex items-center space-x-2"><input type="checkbox" class="w-4 h-4"> <span>Pune</span></label>
-                </div>
+        <aside class="w-full lg:w-1/4 bg-white p-6 rounded-xl border h-fit shadow-sm">
+            <h3 class="font-bold border-b pb-2 mb-4">Search</h3>
+            <input type="text" id="searchInput" onkeyup="searchByName()" placeholder="Type college name..." class="w-full p-2 border rounded bg-gray-50 outline-none">
+            
+            <h3 class="font-bold border-b pb-2 mt-8 mb-4">Filter By Location</h3>
+            <div class="space-y-3" id="locationFilters">
+                <label class="flex items-center space-x-2"><input type="checkbox" value="Delhi" onchange="filterLoc(this)"> <span>Delhi NCR</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" value="Mumbai" onchange="filterLoc(this)"> <span>Mumbai</span></label>
+                <label class="flex items-center space-x-2"><input type="checkbox" value="Bangalore" onchange="filterLoc(this)"> <span>Bangalore</span></label>
             </div>
         </aside>
 
         <main class="flex-1">
-            <h2 class="text-xl font-bold text-gray-800 mb-6">Explore Top Rankings</h2>
+            <h2 class="text-xl font-bold mb-6">Explore Top Rankings</h2>
             <div id="collegeList" class="space-y-4">
                 </div>
-            <div class="text-center mt-12">
-                <button id="loadMore" onclick="loadMore()" class="bg-blue-900 text-white px-10 py-3 rounded-full font-bold hover:bg-blue-800 transition shadow-lg">
-                    Load More Colleges
-                </button>
-            </div>
+            <button onclick="loadMore()" class="mt-8 bg-blue-900 text-white px-10 py-3 rounded-full font-bold block mx-auto">Load More Colleges</button>
         </main>
     </div>
 
     <script>
         const API = "https://college-review-backend-2.onrender.com";
-        let currentPage = 1;
+        let page = 1;
+        let currentLocation = "";
 
-        async function fetchColleges(page = 1, append = false) {
-            try {
-                const response = await fetch(`${API}/colleges?page=${page}`);
-                const data = await response.json();
-                const list = document.getElementById("collegeList");
+        async function loadData(append = false) {
+            let url = `${API}/colleges?page=${page}`;
+            if(currentLocation) url += `&location=${currentLocation}`;
 
-                if (!append) list.innerHTML = "";
+            const res = await fetch(url);
+            const data = await res.json();
+            const list = document.getElementById("collegeList");
 
-                data.colleges.forEach(c => {
-                    const card = document.createElement("div");
-                    card.className = "bg-white p-6 rounded-xl border flex flex-col md:flex-row gap-6 hover:shadow-xl transition relative";
-                    card.innerHTML = `
-                        <div class="w-full md:w-48 h-32 bg-blue-50 rounded-lg flex items-center justify-center text-4xl text-blue-200">
-                            <i class="fa fa-university"></i>
+            if(!append) list.innerHTML = "";
+
+            data.colleges.forEach(c => {
+                const div = document.createElement("div");
+                div.className = "bg-white p-6 rounded-xl border flex gap-6 hover:shadow-xl transition cursor-pointer";
+                // MAKE CLICKABLE: Redirects to college.html with ID
+                div.onclick = () => window.location.href = `college.html?id=${c._id}`;
+                
+                div.innerHTML = `
+                    <div class="w-32 h-24 bg-blue-50 rounded flex items-center justify-center text-3xl text-blue-200"><i class="fa fa-university"></i></div>
+                    <div class="flex-1">
+                        <div class="flex justify-between font-bold text-blue-900 text-lg">
+                            <h4>${c.name}</h4>
+                            <span class="text-orange-500 text-sm">#${c.rank}</span>
                         </div>
-                        <div class="flex-1">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="text-xl font-extrabold text-blue-900">${c.name}</h4>
-                                    <p class="text-gray-500 text-sm"><i class="fa fa-map-marker-alt"></i> ${c.city}</p>
-                                </div>
-                                <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded font-bold text-xs">Rank #${c.rank}</span>
-                            </div>
-                            <div class="mt-4 flex gap-6 text-sm">
-                                <div><p class="text-gray-400">Fees</p><p class="font-bold text-gray-800">${c.fees || '₹ 2L'}</p></div>
-                                <div><p class="text-gray-400">Avg Package</p><p class="font-bold text-green-600">${c.package || '6 LPA'}</p></div>
-                            </div>
-                            <div class="mt-4">
-                                <a href="college.html?id=${c._id}" class="text-blue-600 font-bold hover:underline">Add Review →</a>
-                            </div>
+                        <p class="text-gray-400 text-sm"><i class="fa fa-map-marker-alt"></i> ${c.city}</p>
+                        <div class="mt-4 flex gap-6 text-sm">
+                            <span class="font-bold">Fees: <span class="text-gray-700">${c.fees}</span></span>
+                            <span class="font-bold">Avg Package: <span class="text-green-600">${c.package}</span></span>
                         </div>
-                    `;
-                    list.appendChild(card);
-                });
-            } catch (err) {
-                console.error("Error:", err);
-            }
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function filterLoc(cb) {
+            currentLocation = cb.checked ? cb.value : "";
+            page = 1;
+            loadData();
         }
 
         function loadMore() {
-            currentPage++;
-            fetchColleges(currentPage, true);
+            page++;
+            loadData(true);
         }
 
-        fetchColleges();
+        loadData();
     </script>
 </body>
 </html>
