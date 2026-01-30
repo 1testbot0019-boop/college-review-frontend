@@ -1,92 +1,79 @@
 const API = "https://college-review-backend-2.onrender.com";
+let allColleges = [];
 
-/* ---------- LOAD COLLEGE LIST ---------- */
-if (document.getElementById("collegeList")) {
-  fetch(API + "/colleges")
-    .then(res => res.json())
-    .then(colleges => {
-      const list = document.getElementById("collegeList");
-      list.innerHTML = ""; // Clear any "Loading" text
-      colleges.forEach(c => {
-        const li = document.createElement("li");
-        // This links to your college.html page using the database ID
-        li.innerHTML = `<a href="college.html?id=${c._id}">${c.name} (${c.city})</a>`;
-        list.appendChild(li);
-      });
-    })
-    .catch(err => console.error("Could not load colleges:", err));
+async function loadColleges() {
+    try {
+        const res = await fetch(API + "/colleges");
+        allColleges = await res.json();
+        displayColleges(allColleges);
+    } catch (err) {
+        console.error("Error fetching colleges:", err);
+    }
 }
 
-/* ---------- LOAD SINGLE COLLEGE ---------- */
-const params = new URLSearchParams(window.location.search);
-const collegeId = params.get("id");
+function displayColleges(data) {
+    const grid = document.getElementById("collegeGrid");
+    const countLabel = document.getElementById("countLabel");
+    grid.innerHTML = "";
+    countLabel.innerText = data.length;
 
-if (collegeId && document.getElementById("collegeName")) {
-  fetch(API + "/college/" + collegeId)
-    .then(res => res.json())
-    .then(data => {
-      const c = data.college;
+    data.forEach((c, index) => {
+        const card = document.createElement("div");
+        card.className = "relative bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1";
+        
+        // We use index+1 to create a fake rank (e.g. #1, #2)
+        const rank = index + 1;
 
-      document.getElementById("collegeName").innerText = c.name;
-      document.getElementById("total").innerText = c.totalReviews;
+        card.innerHTML = `
+            <div class="absolute top-0 left-0 bg-orange-500 text-white px-3 py-1 font-bold rounded-br-lg z-10">
+                #${rank} in India
+            </div>
 
-      // Calculate Average Rating
-      const totalStars =
-        c.stars.one * 1 +
-        c.stars.two * 2 +
-        c.stars.three * 3 +
-        c.stars.four * 4 +
-        c.stars.five * 5;
+            <div class="h-40 bg-gray-200 overflow-hidden relative">
+                <img src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover opacity-80" alt="college">
+                <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
+                    <p class="text-white font-bold"><i class="fa fa-map-marker-alt text-orange-400"></i> ${c.city || 'India'}</p>
+                </div>
+            </div>
 
-      const avg = c.totalReviews ? (totalStars / c.totalReviews).toFixed(1) : 0;
-      document.getElementById("avg").innerText = avg;
+            <div class="p-6">
+                <h4 class="text-xl font-bold text-gray-900 mb-2 truncate" title="${c.name}">${c.name}</h4>
+                
+                <div class="flex items-center space-x-2 text-sm mb-4">
+                    <div class="flex text-yellow-400">
+                        <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa-half-alt fa"></i>
+                    </div>
+                    <span class="text-gray-500 font-medium">(4.5/5 Rating)</span>
+                </div>
 
-      document.getElementById("stars").innerHTML = `
-        ⭐⭐⭐⭐⭐ : ${c.stars.five}<br>
-        ⭐⭐⭐⭐ : ${c.stars.four}<br>
-        ⭐⭐⭐ : ${c.stars.three}<br>
-        ⭐⭐ : ${c.stars.two}<br>
-        ⭐ : ${c.stars.one}
-      `;
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-blue-50 p-2 rounded text-center">
+                        <p class="text-xs text-blue-600 font-bold uppercase">Fees</p>
+                        <p class="text-sm font-extrabold text-blue-900">₹ 2.5L - 8L</p>
+                    </div>
+                    <div class="bg-green-50 p-2 rounded text-center">
+                        <p class="text-xs text-green-600 font-bold uppercase">Avg Package</p>
+                        <p class="text-sm font-extrabold text-green-900">₹ 12.5 LPA</p>
+                    </div>
+                </div>
 
-      // Load existing reviews
-      const reviewsList = document.getElementById("reviews");
-      reviewsList.innerHTML = ""; 
-      data.reviews.forEach(r => {
-        const li = document.createElement("li");
-        li.innerText = `${r.rating}★ | ${r.course} | ${r.text}`;
-        reviewsList.appendChild(li);
-      });
+                <div class="flex space-x-3">
+                    <a href="college.html?id=${c._id}" class="flex-1 bg-blue-800 text-white text-center py-2 rounded-lg font-bold hover:bg-blue-900 transition">View Details</a>
+                    <a href="${c.website}" target="_blank" class="px-4 py-2 border-2 border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"><i class="fa fa-globe"></i></a>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
     });
 }
 
-/* ---------- SUBMIT REVIEW ---------- */
-function submitReview() {
-  const rating = document.getElementById("rating").value;
-  const course = document.getElementById("course").value;
-  const year = document.getElementById("year").value;
-  const text = document.getElementById("text").value;
-
-  if(!text || !course) {
-      alert("Please fill in all fields");
-      return;
-  }
-
-  fetch(API + "/review", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      collegeId: collegeId,
-      rating: Number(rating),
-      course: course,
-      year: year,
-      text: text
-    })
-  })
-  .then(res => res.json())
-  .then(() => {
-    alert("Review submitted!");
-    location.reload(); // Refresh to see the new review
-  })
-  .catch(err => alert("Error submitting review: " + err.message));
+function filterColleges() {
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    const filtered = allColleges.filter(c => 
+        c.name.toLowerCase().includes(query) || 
+        (c.city && c.city.toLowerCase().includes(query))
+    );
+    displayColleges(filtered);
 }
+
+loadColleges();
