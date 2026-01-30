@@ -1,14 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>College Reviews India</title>
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Reviews India</title>
+    <style>
+        /* Simple styling to make it look clean */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        #collegeList {
+            list-style: none;
+            padding: 0;
+        }
+        .college-card {
+            background: #fff;
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .college-card strong {
+            font-size: 1.2em;
+            color: #007bff;
+        }
+        .visit-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .visit-btn:hover {
+            background-color: #218838;
+        }
+        #status {
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
 
-<h2>🎓 College Reviews</h2>
-<ul id="collegeList"></ul>
+    <h2>🎓 Indian College Directory</h2>
+    
+    <div id="status">Loading colleges from database...</div>
 
-<script src="script.js"></script>
+    <ul id="collegeList"></ul>
+
+    <script>
+        // YOUR BACKEND URL
+        const API_URL = "https://college-review-backend-2.onrender.com/colleges";
+
+        async function fetchColleges() {
+            const list = document.getElementById("collegeList");
+            const status = document.getElementById("status");
+
+            try {
+                // Fetch data from your Render backend
+                const response = await fetch(API_URL);
+                
+                if (!response.ok) throw new Error("Backend not responding");
+
+                const colleges = await response.json();
+
+                // Remove the loading message
+                status.style.display = "none";
+
+                // Loop through your 20 colleges and create HTML for each
+                colleges.forEach(college => {
+                    const li = document.createElement("li");
+                    li.className = "college-card";
+                    li.innerHTML = `
+                        <strong>${college.name}</strong><br>
+                        📍 Location: ${college.city || "India"}<br>
+                        <a href="${college.website}" target="_blank" class="visit-btn">Visit Website</a>
+                    `;
+                    list.appendChild(li);
+                });
+
+            } catch (error) {
+                console.error("Error:", error);
+                status.innerHTML = "❌ Error: Could not connect to backend. Make sure Render is 'Live'.";
+                status.style.color = "red";
+            }
+        }
+
+        // Run the function immediately
+        fetchColleges();
+    </script>
 </body>
 </html>
