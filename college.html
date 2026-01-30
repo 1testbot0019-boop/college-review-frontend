@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>College Details</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+
+<h2 id="collegeName"></h2>
+
+<p>
+  ⭐ Average Rating: <span id="avg">0</span> / 5  
+  <br>
+  Total Reviews: <span id="total">0</span>
+</p>
+
+<h4>Rating Breakdown</h4>
+<div id="stars"></div>
+
+<hr>
+
+<h3>Add Your Review</h3>
+
+<select id="rating">
+  <option value="5">5 Stars</option>
+  <option value="4">4 Stars</option>
+  <option value="3">3 Stars</option>
+  <option value="2">2 Stars</option>
+  <option value="1">1 Star</option>
+</select>
+<br><br>
+
+<input id="course" placeholder="Course (e.g. BTech)" />
+<br><br>
+
+<input id="year" placeholder="Pass-out Year" />
+<br><br>
+
+<textarea id="text" placeholder="Write your honest review (min 30 chars)"></textarea>
+<br><br>
+
+<button onclick="submitReview()">Submit Review</button>
+
+<hr>
+
+<h3>Student Reviews</h3>
+<ul id="reviews"></ul>
+
+<script src="script.js"></script>
+</body>
+</html>
