@@ -1,51 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>College Details</title>
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Details & Reviews</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; max-width: 700px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1 { color: #2c3e50; margin-top: 0; }
+        .stats { background: #eef2f3; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .review-item { border-bottom: 1px solid #eee; padding: 10px 0; list-style: none; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background-color: #3498db; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
+        button:hover { background-color: #2980b9; }
+        .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #3498db; }
+    </style>
 </head>
 <body>
 
-<h2 id="collegeName"></h2>
+    <a href="index.html" class="back-link">← Back to College List</a>
 
-<p>
-  ⭐ Average Rating: <span id="avg">0</span> / 5  
-  <br>
-  Total Reviews: <span id="total">0</span>
-</p>
+    <div class="card">
+        <h1 id="collegeName">Loading...</h1>
+        <div class="stats">
+            <strong>Average Rating:</strong> <span id="avg">0</span> ⭐ | 
+            <strong>Total Reviews:</strong> <span id="total">0</span>
+        </div>
+        
+        <h3>Rating Breakdown</h3>
+        <div id="stars">
+            </div>
+    </div>
 
-<h4>Rating Breakdown</h4>
-<div id="stars"></div>
+    <div class="card">
+        <h3>Submit a Review</h3>
+        <div class="form-group">
+            <label>Rating</label>
+            <select id="rating">
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Course Name</label>
+            <input type="text" id="course" placeholder="e.g. B.Tech Computer Science">
+        </div>
+        <div class="form-group">
+            <label>Batch Year</label>
+            <input type="number" id="year" placeholder="e.g. 2024">
+        </div>
+        <div class="form-group">
+            <label>Your Review</label>
+            <textarea id="text" rows="4" placeholder="Share your experience..."></textarea>
+        </div>
+        <button onclick="submitReview()">Submit Review</button>
+    </div>
 
-<hr>
+    <div class="card">
+        <h3>Student Reviews</h3>
+        <ul id="reviews" style="padding: 0;">
+            </ul>
+    </div>
 
-<h3>Add Your Review</h3>
-
-<select id="rating">
-  <option value="5">5 Stars</option>
-  <option value="4">4 Stars</option>
-  <option value="3">3 Stars</option>
-  <option value="2">2 Stars</option>
-  <option value="1">1 Star</option>
-</select>
-<br><br>
-
-<input id="course" placeholder="Course (e.g. BTech)" />
-<br><br>
-
-<input id="year" placeholder="Pass-out Year" />
-<br><br>
-
-<textarea id="text" placeholder="Write your honest review (min 30 chars)"></textarea>
-<br><br>
-
-<button onclick="submitReview()">Submit Review</button>
-
-<hr>
-
-<h3>Student Reviews</h3>
-<ul id="reviews"></ul>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
