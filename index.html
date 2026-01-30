@@ -3,89 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CollegeGuru | Search 1 Lakh Colleges</title>
+    <title>CollegeGuru | Live Data</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
 
-    <nav class="bg-white border-b p-4 sticky top-0 z-50 shadow-sm flex justify-between items-center px-10">
+    <nav class="bg-white border-b p-4 flex justify-between items-center px-10 shadow-md">
         <h1 class="text-2xl font-black text-blue-900">COLLEGE<span class="text-orange-500">GURU</span></h1>
-        <div class="space-x-6 font-bold text-gray-600">
-            <a href="#">Top Colleges</a> <a href="#">Reviews</a> <a href="#">Courses</a>
+        <div class="hidden md:flex space-x-6 font-bold text-gray-600 uppercase text-xs tracking-wider">
+            <a href="#" class="hover:text-blue-900">Top Colleges</a>
+            <a href="#" class="hover:text-blue-900">Reviews</a>
+            <a href="#" class="hover:text-blue-900">Courses</a>
         </div>
     </nav>
 
+    <div class="bg-slate-900 text-white overflow-x-auto px-6 py-3 flex space-x-8 text-xs font-bold uppercase tracking-widest border-b border-slate-700 no-scrollbar">
+        <button onclick="filterCourse('All')" class="hover:text-orange-400 flex items-center gap-2"><i class="fa fa-th"></i> All Courses</button>
+        <button onclick="filterCourse('B.Tech')" class="hover:text-orange-400">B.Tech</button>
+        <button onclick="filterCourse('MBA')" class="hover:text-orange-400">MBA</button>
+        <button onclick="filterCourse('MBBS')" class="hover:text-orange-400">MBBS</button>
+        <button onclick="filterCourse('B.Com')" class="hover:text-orange-400">B.Com</button>
+        <button onclick="filterCourse('B.Sc')" class="hover:text-orange-400">B.Sc</button>
+        <button onclick="filterCourse('BCA')" class="hover:text-orange-400">BCA</button>
+    </div>
+
     <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 p-6">
-        <aside class="w-full lg:w-1/4 bg-white p-6 rounded-xl border h-fit shadow-sm">
-            <h3 class="font-bold border-b pb-2 mb-4">Search</h3>
-            <input type="text" id="searchInput" onkeyup="searchByName()" placeholder="Type college name..." class="w-full p-2 border rounded bg-gray-50 outline-none">
-            
-            <h3 class="font-bold border-b pb-2 mt-8 mb-4">Filter By Location</h3>
-            <div class="space-y-3" id="locationFilters">
-                <label class="flex items-center space-x-2"><input type="checkbox" value="Delhi" onchange="filterLoc(this)"> <span>Delhi NCR</span></label>
-                <label class="flex items-center space-x-2"><input type="checkbox" value="Mumbai" onchange="filterLoc(this)"> <span>Mumbai</span></label>
-                <label class="flex items-center space-x-2"><input type="checkbox" value="Bangalore" onchange="filterLoc(this)"> <span>Bangalore</span></label>
+        <aside class="w-full lg:w-1/4 space-y-6">
+            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                <h3 class="font-bold text-sm text-gray-400 uppercase mb-4">Search College</h3>
+                <input type="text" id="searchInput" onkeyup="searchByName()" placeholder="e.g. IIT Delhi" class="w-full p-3 border rounded-lg bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                
+                <h3 class="font-bold text-sm text-gray-400 uppercase mt-8 mb-4">Top Cities</h3>
+                <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <button class="text-left hover:text-blue-600">Delhi</button>
+                    <button class="text-left hover:text-blue-600">Mumbai</button>
+                    <button class="text-left hover:text-blue-600">Bangalore</button>
+                    <button class="text-left hover:text-blue-600">Pune</button>
+                </div>
             </div>
         </aside>
 
         <main class="flex-1">
-            <h2 class="text-xl font-bold mb-6">Explore Top Rankings</h2>
+            <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+                <div class="h-6 w-1 bg-orange-500"></div> Top <span id="currentCategory" class="text-blue-800">All</span> Colleges
+            </h2>
             <div id="collegeList" class="space-y-4">
                 </div>
-            <button onclick="loadMore()" class="mt-8 bg-blue-900 text-white px-10 py-3 rounded-full font-bold block mx-auto">Load More Colleges</button>
+            <button onclick="loadMore()" class="mt-10 bg-blue-900 text-white px-12 py-3 rounded-full font-bold block mx-auto hover:scale-105 transition">View More Colleges</button>
         </main>
     </div>
 
     <script>
         const API = "https://college-review-backend-2.onrender.com";
         let page = 1;
-        let currentLocation = "";
+        let currentCourse = "All";
+        let searchTerm = "";
 
         async function loadData(append = false) {
-            let url = `${API}/colleges?page=${page}`;
-            if(currentLocation) url += `&location=${currentLocation}`;
+            let url = `${API}/colleges?page=${page}&course=${currentCourse}&search=${searchTerm}`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                const list = document.getElementById("collegeList");
+                if(!append) list.innerHTML = "";
 
-            const res = await fetch(url);
-            const data = await res.json();
-            const list = document.getElementById("collegeList");
-
-            if(!append) list.innerHTML = "";
-
-            data.colleges.forEach(c => {
-                const div = document.createElement("div");
-                div.className = "bg-white p-6 rounded-xl border flex gap-6 hover:shadow-xl transition cursor-pointer";
-                // MAKE CLICKABLE: Redirects to college.html with ID
-                div.onclick = () => window.location.href = `college.html?id=${c._id}`;
-                
-                div.innerHTML = `
-                    <div class="w-32 h-24 bg-blue-50 rounded flex items-center justify-center text-3xl text-blue-200"><i class="fa fa-university"></i></div>
-                    <div class="flex-1">
-                        <div class="flex justify-between font-bold text-blue-900 text-lg">
-                            <h4>${c.name}</h4>
-                            <span class="text-orange-500 text-sm">#${c.rank}</span>
+                data.colleges.forEach(c => {
+                    const div = document.createElement("div");
+                    div.className = "bg-white p-6 rounded-xl border-l-4 border-l-blue-900 shadow-sm flex gap-6 hover:shadow-md transition cursor-pointer group";
+                    div.onclick = () => window.location.href = `college.html?id=${c._id}`;
+                    div.innerHTML = `
+                        <div class="w-24 h-24 bg-gray-100 rounded flex items-center justify-center text-3xl text-gray-300 group-hover:text-blue-200"><i class="fa fa-university"></i></div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-gray-900 group-hover:text-blue-900">${c.name}</h4>
+                                <span class="bg-blue-50 text-blue-700 text-[10px] font-black px-2 py-1 rounded">RANK #${c.rank}</span>
+                            </div>
+                            <p class="text-gray-400 text-xs mt-1 uppercase font-semibold tracking-tighter">${c.course} | ${c.city}</p>
+                            <div class="mt-4 flex gap-4">
+                                <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">AVG PKG: ${c.package}</span>
+                                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">FEES: ${c.fees}</span>
+                            </div>
                         </div>
-                        <p class="text-gray-400 text-sm"><i class="fa fa-map-marker-alt"></i> ${c.city}</p>
-                        <div class="mt-4 flex gap-6 text-sm">
-                            <span class="font-bold">Fees: <span class="text-gray-700">${c.fees}</span></span>
-                            <span class="font-bold">Avg Package: <span class="text-green-600">${c.package}</span></span>
-                        </div>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (e) { console.error("Fetch Error:", e); }
         }
 
-        function filterLoc(cb) {
-            currentLocation = cb.checked ? cb.value : "";
+        function filterCourse(course) {
+            currentCourse = course;
+            document.getElementById("currentCategory").innerText = course;
             page = 1;
             loadData();
         }
 
-        function loadMore() {
-            page++;
-            loadData(true);
+        function searchByName() {
+            searchTerm = document.getElementById("searchInput").value;
+            page = 1;
+            loadData();
         }
+
+        function loadMore() { page++; loadData(true); }
 
         loadData();
     </script>
